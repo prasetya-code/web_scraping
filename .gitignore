@@ -1,0 +1,12 @@
+# Env
+win_env
+
+# Cache
+**__pycache__
+
+# Files
+*.csv
+*.json
+
+# storage
+storage
