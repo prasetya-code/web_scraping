@@ -33,6 +33,28 @@ pipelines/
 └── database.py
 ```
 
+> Urutan implementasi pipeline
+
+| Tahap | Fitur                                  | Prioritas         |
+| ----- | -------------------------------------- | ----------------- |
+| 1     | Data Validation                        | ⭐⭐⭐⭐⭐     |
+| 2     | Data Cleaning                          | ⭐⭐⭐⭐⭐     |
+| 3     | Anti-Duplicate                         | ⭐⭐⭐⭐⭐     |
+| 4     | Change Detection                       | ⭐⭐⭐⭐⭐     |
+| 5     | Incremental Scraping                   | ⭐⭐⭐⭐⭐     |
+| 6     | Session Management                     | ⭐⭐⭐⭐☆      |
+| 7     | Monitoring (Stats Collector)           | ⭐⭐⭐⭐☆      |
+| 8     | Alerting                               | ⭐⭐⭐⭐☆      |
+| 9     | Metadata Collection                    | ⭐⭐⭐⭐☆      |
+| 10    | Selector Versioning                    | ⭐⭐⭐⭐☆      |
+| 11    | Crawl Discovery                        | ⭐⭐⭐☆☆       |
+| 12    | Prioritization Queue                   | ⭐⭐⭐☆☆       |
+| 13    | Headless Browser (`scrapy-playwright`) | ⭐⭐⭐☆☆       |
+| 14    | Asset Download                         | ⭐⭐☆☆☆        |
+| 15    | ETL Pipeline lengkap                   | ⭐⭐⭐⭐☆      |
+| 16    | Distributed Crawling (`scrapy-redis`)  | ⭐⭐☆☆☆        |
+
+
 2. Selector versioning
 ```bash
 Halaman List
