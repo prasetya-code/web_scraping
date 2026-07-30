@@ -16,9 +16,9 @@ def _hash(value: str | None, algorithm: str) -> str:
 
         fingerprint = hasher.hexdigest()    # generate string fingerprint
 
-        print(f"\n{'=' * 30}")
-        logger.debug(f"'{algorithm.upper()}'fingerprint generated successfully.")
-        print(f"{'=' * 30}\n")
+        # print(f"\n{'=' * 30}")
+        # logger.debug(f"'{algorithm.upper()}'fingerprint generated successfully.")
+        # print(f"{'=' * 30}\n")
 
         return fingerprint
 

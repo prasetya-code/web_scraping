@@ -1,4 +1,4 @@
-from test_scrape.src.items.books_item import BookItem
+from src.items.books_item import BookItem
 from src.utils.fingerprint import sha256
 
 
@@ -135,11 +135,11 @@ class BooksSelectorV1(BaseBooksSelector):
             'normalize-space(//table//tr[th="Product Type"]/td)'
         ).get()
 
-        book_detail.price_excl_tax = response.xpath(
+        book_detail.excl_tax_euro = response.xpath(
             'normalize-space(//table//tr[th="Price (excl. tax)"]/td)'
         ).get()
 
-        book_detail.price_incl_tax = response.xpath(
+        book_detail.incl_tax_euro = response.xpath(
             'normalize-space(//table//tr[th="Price (incl. tax)"]/td)'
         ).get()
 

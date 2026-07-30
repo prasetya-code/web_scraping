@@ -61,6 +61,7 @@ class BookItem:
 
     upc: Optional[str] = None
     product_type: Optional[str] = None
+    category: Optional[str] = None
 
     excl_tax_euro: Optional[str] = None
     incl_tax_euro: Optional[str] = None
@@ -70,7 +71,6 @@ class BookItem:
     reviews: Optional[str] = None
 
     description: Optional[str] = None
-    category: Optional[str] = None
 
     # ==========================
     # Metadata

@@ -64,16 +64,24 @@ class BooksSpider(scrapy.Spider):
             self.logger.info(f"Start Time : {self.start_time}")
             print(f"{'=' * 30}\n")
 
-            yield scrapy.Request(
+
+            self.logger.info("Create first request")
+
+            request = scrapy.Request(
                 url=self.target_url,
                 callback=self.parse,
             )
 
+            self.logger.info(request)
+
+            yield request
+
+            self.logger.info("Request yielded")
+
+
         except Exception:
 
-            self.logger.exception(
-                "Error saat memulai spider."
-            )
+            self.logger.exception(f"Error saat memulai spider.")
 
     # METADATA
     def fill_metadata(self, item, response):
@@ -163,13 +171,15 @@ class BooksSpider(scrapy.Spider):
             # Mengambil seluruh daftar buku
             books = selector.books(response)
 
+            # ======================================
             # Iterasi setiap buku
+            # ======================================
             for book in books:
 
                 # Mengambil data singkat buku
                 item = selector.extract_book(
                     response=response,
-                    book=book,
+                    book_display=book,
                 )
 
                 # Mengisi metadata item
@@ -183,7 +193,7 @@ class BooksSpider(scrapy.Spider):
                     url=item.link,
                     callback=self.detail_parse,
                     cb_kwargs={
-                        "item": item,
+                        "book_detail": item,
                     },
                 )
 
@@ -209,7 +219,7 @@ class BooksSpider(scrapy.Spider):
 
 
     # Books Detail
-    def detail_parse(self, response, item):
+    def detail_parse(self, response, book_detail):
         # Collector - Detail
         stats = self.crawler.stats
 
@@ -224,13 +234,19 @@ class BooksSpider(scrapy.Spider):
             # Selector
             selector = self.selector_manager.get(response)
 
-            # Mengambil data detail buku
-            item = selector.extract_detail(
+            # Memperbarui metadata berdasarkan response halaman detail
+            book_detail = self.fill_metadata(
+                item=book_detail,
                 response=response,
-                item=item,
             )
 
-            yield item
+            # Mengambil data detail buku
+            book_detail = selector.extract_detail(
+                response=response,
+                book_detail=book_detail,
+            )
+
+            yield book_detail
 
         except Exception:
 
