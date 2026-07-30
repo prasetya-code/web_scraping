@@ -1,0 +1,70 @@
+# Rekomendasi Set Base(CONCURRENT_REQUESTS_PER_DOMAIN & TARGET_CONCURRENCY) di Scrapy Settings
+
+| Jenis Website        | CONCURRENT_REQUESTS_PER_DOMAIN | TARGET_CONCURRENCY |
+| -------------------- | -----------------------------: | -----------------: |
+| Website publik       |                            1–2 |                1.0 |
+| Website cukup cepat  |                            2–4 |            1.5–2.0 |
+| API publik           |                            4–8 |            2.0–4.0 |
+| Server milik sendiri |                           8–16 |            4.0–8.0 |
+
+
+# Notes
+1. pipeline tree
+```bash
+pipelines/
+│
+├── preprocessing.py
+│     ├── ValidationPipeline
+│     ├── CleaningPipeline
+│     └── NormalizationPipeline
+│
+├── detection.py
+│     ├── FingerprintPipeline
+│     ├── DuplicatePipeline
+│     ├── IncrementalPipeline
+│     └── ChangeDetectionPipeline
+│
+├── assets.py
+│     ├── BookImagesPipeline
+│     └── BookFilesPipeline
+│
+├── transform.py
+│
+└── database.py
+```
+
+2. Selector versioning
+```bash
+Halaman List
+      │
+      ▼
+SelectorManager
+      │
+      ▼
+BooksSelectorV2
+      │
+      ▼
+extract_book()
+      │
+      ▼
+Request Detail
+      │
+      ▼
+Halaman Detail
+      │
+      ▼
+SelectorManager
+      │
+      ▼
+BooksSelectorV1
+      │
+      ▼
+extract_detail()
+```
+
+Keuntungannya adalah setiap Response selalu dideteksi berdasarkan HTML yang diterima. Jika suatu saat hanya halaman katalog yang berubah ke V2 sementara halaman detail masih menggunakan struktur V1 (atau sebaliknya), spider tetap akan memilih selector yang tepat tanpa perlu logika tambahan atau meneruskan objek selector antar callback. Ini membuat arsitektur versioning lebih fleksibel dan tahan terhadap perubahan parsial pada website.
+
+3. Metadata
+      - Crawl Metadata: menggunakan `stats collector` 
+      - Request Metadata: menggunakan `items` -> disatukan dengan items data utama namun beda class
+      - Spider Metadata: menggunakan `items` -> disatukan dengan items data utama namun beda class
