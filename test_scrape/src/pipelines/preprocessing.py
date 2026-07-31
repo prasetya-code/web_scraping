@@ -1,15 +1,3 @@
-"""
-Pipeline yang bertugas melakukan preprocessing data hasil scraping
-sebelum diteruskan ke pipeline berikutnya.
-
-Urutan pipeline yang direkomendasikan:
-
-1. CleaningPipeline         : Membersihkan whitespace dan karakter yang tidak diperlukan.
-2. ValidationPipeline       : Memastikan field wajib tersedia dan valid.
-3. TypeConversionPipeline   : Mengubah tipe data (str -> float, int, bool, dsb).
-4. NormalizationPipeline    : Menormalisasi nilai agar memiliki format yang seragam.
-"""
-
 import re
 
 from dataclasses import fields
@@ -21,6 +9,17 @@ class BasePipe:
     """
     Tujuan class ini adalah mengurangi duplikasi kode (Don't Repeat Yourself / DRY).
     """
+
+    # ------------------------------------------------------------------
+    # Regex yang digunakan bersama oleh beberapa pipeline.
+    # ------------------------------------------------------------------
+    NUMBER_PATTERN = re.compile(
+        r"[^\d.]"
+    )
+
+    INTEGER_PATTERN = re.compile(
+        r"\d+"
+    )
 
     def open_spider(self, spider):
         """
@@ -51,8 +50,32 @@ class BasePipe:
         Helper untuk mencetak stack trace lengkap.
         """
 
-        spider.logger.exception(
-            f"Unexpected error in {self.__class__.__name__}"
+        spider.logger.exception(f"Unexpected error in {self.__class__.__name__}")
+
+    # ==============================================================
+    # Helper Methods
+    # ==============================================================
+
+    def get_value(self, item, field):
+        """
+        Helper untuk mengambil nilai field item.
+        """
+
+        return getattr(
+            item,
+            field,
+            None,
+        )
+
+    def set_value(self, item, field, value):
+        """
+        Helper untuk mengubah nilai field item.
+        """
+
+        setattr(
+            item,
+            field,
+            value,
         )
 
 
@@ -69,20 +92,13 @@ class CleaningPipe(BasePipe):
             # Menggunakan dataclasses.fields() membuat pipeline ini otomatis bekerja walaupun nanti jumlah field bertambah.
             for field in fields(item):
 
-                value = getattr(
-                    item,
-                    field.name,
-                    None,
-                )
+                value = self.get_value(item, field.name,)
 
                 # Hanya string yang perlu dibersihkan.
-                if isinstance(value, str):
+                if not isinstance(value, str):
+                    continue
 
-                    setattr(
-                        item,
-                        field.name,
-                        value.strip(),
-                    )
+                self.set_value(item, field.name, value.strip())
 
             self.log_success(spider, item)
 
@@ -90,7 +106,7 @@ class CleaningPipe(BasePipe):
 
         except Exception:
 
-            self.log_exception(spider,)
+            self.log_exception(spider)
             raise
 
 
@@ -102,13 +118,29 @@ class ValidationPipe(BasePipe):
 
     # ------------------------------------------------------------------
     # > Apabila salah satu field tidak ada atau bernilai kosong, maka item akan dianggap tidak valid.
-    # > fields harus sama dengan crawl items
+    # > fields harus sama dengan data items
     # ------------------------------------------------------------------
     REQUIRED_FIELDS = (
         "title",
         "price_euro",
         "rating",
         "link",
+    )
+
+    # ------------------------------------------------------------------
+    # Field yang harus mengandung nilai numerik.
+    # Parsing dilakukan pada DataTypePipe.
+    # ------------------------------------------------------------------
+    FLOAT_FIELDS = (
+        "price_euro",
+        "excl_tax_euro",
+        "incl_tax_euro",
+        "tax",
+        "reviews",
+    )
+
+    INT_FIELDS = (
+        "stock",
     )
 
     def process_item(self, item, spider):
@@ -120,28 +152,29 @@ class ValidationPipe(BasePipe):
             # ----------------------------------------------------------
             for field in self.REQUIRED_FIELDS:
 
-                value = getattr(
-                    item,
-                    field,
-                    None,
+                self._validate_required(field, self.get_value(
+                        item,
+                        field,
+                    ),
                 )
 
-                self._validate_required(field, value)
+            # ----------------------------------------------------------
+            # Validasi numerik (DataTypePipe)
+            # ----------------------------------------------------------
+            self._validate_numeric(item,)
 
-            # ----------------------------------------------------------
-            # Validasi numerik (TypeConversionPipeline)
-            # ----------------------------------------------------------
-            self._validate_numeric(item)
 
             self.log_success(spider, item)
 
             return item
 
         except DropItem as e:
+
             spider.logger.warning(f"{self.__class__.__name__}: {e}")
             raise
 
         except Exception:
+
             self.log_exception(spider)
             raise
 
@@ -149,7 +182,7 @@ class ValidationPipe(BasePipe):
     # Helper Methods
     # ==============================================================
 
-    def _validate_required(self, field, value):
+    def _validate_required(self, field, value,):
         """
         Kondisi yang dianggap tidak valid:
         ==================================
@@ -161,197 +194,72 @@ class ValidationPipe(BasePipe):
         if value is None:
             raise DropItem(f"Field '{field}' is required.")
 
-        if isinstance(value, str) and not value:
+        if (isinstance(value, str) and not value):
             raise DropItem(f"Field '{field}' is empty.")
-
 
     def _validate_numeric(self, item):
         """
         - Memastikan field hanya numeric (sama dengan data numeric items).
-        - Parsing dilakukan pada TypeConversionPipeline.
+        - Parsing dilakukan pada DataTypePipe.
         """
 
-        # price_euro param
-        # =================
-        price_euro = getattr(
-            item,
-            "price_euro",
-            None,
-        )
+        for field in self.FLOAT_FIELDS:
 
-        if price_euro is None:
-            raise DropItem("price_euro is required.")
+            self._validate_float(item field)
 
-        if isinstance(price_euro, str):
-            # Membersihkan semua karakter selain angka (0-9) dan titik (cocok jika tidak ada spasi)
-            cleaned_price_euro = re.sub(
-                r"[^\d.]",
-                "",
-                price_euro,
-            )
+        for field in self.INT_FIELDS:
 
-            if not cleaned_price_euro:
-                raise DropItem("price_euro contains no numeric value.")
+            self._validate_integer(item, field)
 
-
-        # excl_tax_euro param
-        # =================
-        excl_tax_euro = getattr(
-            item,
-            "excl_tax_euro",
-            None,
-        )
-
-        if excl_tax_euro is None:
-            raise DropItem("excl_tax_euro is required.")
-
-        if isinstance(excl_tax_euro, str):
-            # Membersihkan semua karakter selain angka (0-9) dan titik (cocok jika tidak ada spasi)
-            cleaned_excl_tax_euro = re.sub(
-                r"[^\d.]",
-                "",
-                excl_tax_euro,
-            )
-
-            if not cleaned_excl_tax_euro:
-                raise DropItem("excl_tax_euro contains no numeric value.")
-
-
-        # incl_tax_euro param
-        # =================
-        incl_tax_euro = getattr(
-            item,
-            "incl_tax_euro",
-            None,
-        )
-
-        if incl_tax_euro is None:
-            raise DropItem("incl_tax_euro is required.")
-
-        if isinstance(incl_tax_euro, str):
-            # Membersihkan semua karakter selain angka (0-9) dan titik (cocok jika tidak ada spasi)
-            cleaned_incl_tax_euro = re.sub(
-                r"[^\d.]",
-                "",
-                incl_tax_euro,
-            )
-
-            if not cleaned_incl_tax_euro:
-                raise DropItem("incl_tax_euro contains no numeric value.")
-
-
-        # tax param
-        # =================
-        tax = getattr(
-            item,
-            "tax",
-            None,
-        )
-
-        if tax is None:
-            raise DropItem("tax is required.")
-
-        if isinstance(tax, str):
-            # Membersihkan semua karakter selain angka (0-9) dan titik (cocok jika tidak ada spasi)
-            cleaned_tax = re.sub(
-                r"[^\d.]",
-                "",
-                tax,
-            )
-
-            if not cleaned_tax:
-                raise DropItem("tax contains no numeric value.")
-
-
-        # stock param
-        # =================
-        stock = getattr(
-            item,
-            "stock",
-            None,
-        )
-
-        if stock is None:
-            raise DropItem(
-                "stock is required."
-            )
-
-        if isinstance(stock, str):
-            # Mengambil satu atau lebih angka dari string yang ada
-            match = re.search(
-                r"\d+",
-                stock,
-            )
-
-            if not match:
-                raise DropItem(
-                    "stock contains no numeric value."
-                )
-
-            stock = int(
-                match.group()
-            )
-
-            setattr(
-                item,
-                "stock",
-                stock,
-            )
-
-
-        # reviews param
-        # =================
-        reviews = getattr(
-            item,
-            "reviews",
-            None,
-        )
-
-        if reviews is None:
-            raise DropItem("reviews is required.")
-
-        if isinstance(reviews, str):
-            # Membersihkan semua karakter selain angka (0-9) dan titik (cocok jika tidak ada spasi)
-            cleaned_reviews = re.sub(
-                r"[^\d.]",
-                "",
-                reviews,
-            )
-
-            if not cleaned_reviews:
-                raise DropItem("reviews contains no numeric value.")        
-
-
-    def _validate_change(self, item):
+    def _validate_float(self, item, field):
         """
-        Validation ini sengaja dipisahkan untuk 
-        merubah value str -> num         
+        Memastikan field mengandung nilai numerik
+        tanpa mengubah tipe datanya.
         """
 
-        # rating param
-        # =================
-        rating = getattr(
-            item,
-            "rating",
-            None,
+        value = self.get_value(item, field)
+
+        if value is None:
+            raise DropItem(f"{field} is required.")
+
+        if not isinstance(value, str):
+            return
+
+        # Membersihkan semua karakter selain angka (0-9) dan titik (cocok jika tidak ada spasi)
+        cleaned = self.NUMBER_PATTERN.sub(
+            "",
+            value,
         )
 
-        if rating is None:
-            raise DropItem("Rating is required.")
+        if not cleaned:
+            raise DropItem(f"{field} contains no numeric value.")
+
+    def _validate_integer(self, item, field):
+        """
+        Memastikan field mengandung bilangan bulat
+        tanpa mengubah tipe datanya.
+        """
+
+        value = self.get_value(item, field)
+
+        if value is None:
+            raise DropItem(f"{field} is required.")
+
+        if not isinstance(value, str):
+            return
+
+        # Mengambil satu atau lebih angka dari string yang ada
+        match = self.INTEGER_PATTERN.search(value)
+
+        if not match:
+            raise DropItem(f"{field} contains no numeric value.")
 
 
-class TypePipe(BasePipe):
+class DataTypePipe(BasePipe):
     """
     - Bertugas mengubah tipe data hasil scraping menjadi tipe Python yang sesuai.
     - Pipeline ini TIDAK melakukan normalisasi nilai.
     """
-
-    # ------------------------------------------------------------------
-    # Regex dikompilasi satu kali ketika class dibuat.
-    # ------------------------------------------------------------------
-    NUMBER_PATTERN = re.compile(
-        r"[^\d.]"
-    )
 
     # ------------------------------------------------------------------
     # Daftar field yang harus dikonversi menjadi float.
@@ -363,6 +271,14 @@ class TypePipe(BasePipe):
         "tax",
     )
 
+    # ------------------------------------------------------------------
+    # Daftar field yang harus dikonversi menjadi integer.
+    # ------------------------------------------------------------------
+    INT_FIELDS = (
+        "stock",
+        "reviews",
+    )
+
     def process_item(self, item, spider):
 
         try:
@@ -371,13 +287,22 @@ class TypePipe(BasePipe):
             # Konversi seluruh field float.
             # ----------------------------------------------------------
             for field in self.FLOAT_FIELDS:
+
                 self._convert_float(item, field)
+
+            # ----------------------------------------------------------
+            # Konversi seluruh field integer.
+            # ----------------------------------------------------------
+            for field in self.INT_FIELDS:
+
+                self._convert_integer(item, field,)
 
             self.log_success(spider, item)
 
             return item
 
         except Exception:
+
             self.log_exception(spider)
             raise
 
@@ -385,23 +310,20 @@ class TypePipe(BasePipe):
     # Helper Methods
     # ==============================================================
 
-    def _convert_float(self, item, field,
-    ):
+    def _convert_float(self, item, field,):
         """
-        Mengubah string menjadi float. Apabila field tidak ada maka akan dilewati.
+        Mengubah string menjadi float.
+        Apabila field tidak ada maka akan dilewati.
         """
 
-        value = getattr(
-            item,
-            field,
-            None,
-        )
+        value = self.get_value(item, field)
 
         if value is None:
             return
 
         # --------------------------------------------------------------
-        # Apabila sebelumnya pipeline lain sudah mengubah menjadi float, maka tidak perlu diproses lagi.
+        # Apabila sebelumnya pipeline lain sudah mengubah menjadi float,
+        # maka tidak perlu diproses lagi.
         # --------------------------------------------------------------
         if isinstance(value, float):
             return
@@ -411,12 +333,7 @@ class TypePipe(BasePipe):
         # --------------------------------------------------------------
         if isinstance(value, int):
 
-            setattr(
-                item,
-                field,
-                float(value),
-            )
-
+            self.set_value(item, field, float(value))
             return
 
         # --------------------------------------------------------------
@@ -433,16 +350,53 @@ class TypePipe(BasePipe):
         if not cleaned:
             return
 
-        setattr(
-            item,
-            field,
-            float(cleaned),
+        self.set_value(item, field, float(cleaned))
+
+    def _convert_integer(self, item, field):
+        """
+        Mengubah string menjadi integer.
+        Apabila field tidak ada maka akan dilewati.
+        """
+
+        value = self.get_value(item, field)
+
+        if value is None:
+            return
+
+        # --------------------------------------------------------------
+        # Apabila sebelumnya pipeline lain sudah mengubah menjadi integer,
+        # maka tidak perlu diproses lagi.
+        # --------------------------------------------------------------
+        if isinstance(value, int):
+            return
+
+        # --------------------------------------------------------------
+        # Float juga dapat langsung diubah menjadi integer.
+        # --------------------------------------------------------------
+        if isinstance(value, float):
+
+            self.set_value(item, field, int(value))
+            return
+
+        # --------------------------------------------------------------
+        # Mengambil satu atau lebih angka dari string yang ada.
+        # --------------------------------------------------------------
+        match = self.INTEGER_PATTERN.search(
+            str(value),
         )
+
+        # --------------------------------------------------------------
+        # Hindari ValueError apabila string kosong.
+        # --------------------------------------------------------------
+        if not match:
+            return
+
+        self.set_value(item, field, int(match.group()))
 
 
 class NormalizationPipe(BasePipe):
     """
-    Bertugas menyeragamkan nilai (business value normalization), 
+    Bertugas menyeragamkan nilai (business value normalization),
     sehingga seluruh item memiliki representasi data yang konsisten.
     """
 
@@ -473,6 +427,7 @@ class NormalizationPipe(BasePipe):
             return item
 
         except Exception:
+
             self.log_exception(spider)
             raise
 
@@ -480,57 +435,121 @@ class NormalizationPipe(BasePipe):
     # Helper Methods
     # ==============================================================
 
-    def _normalize_rating(
-        self,
-        item,
-    ):
+    def _normalize_rating(self, item):
         """
         Mengubah rating website menjadi integer.
         """
 
-        rating = getattr(
-            item,
-            "rating",
-            None,
-        )
+        rating = self.get_value(item, "rating")
 
         if rating is None:
-
             return
 
-        setattr(
-            item,
-            "rating",
+        # --------------------------------------------------------------
+        # Apabila rating sudah berupa integer maka tidak perlu diproses.
+        # --------------------------------------------------------------
+        if isinstance(rating, int):
+            return
+
+        self.set_value(item, "rating",
             self.RATING_MAP.get(
                 rating,
                 0,
             ),
         )
 
-
-    def _normalize_category(
-        self,
-        item,
-    ):
+    def _normalize_category(self, item):
         """
         Menyeragamkan penulisan kategori.
         """
 
-        category = getattr(
-            item,
-            "category",
-            None,
-        )
+        category = self.get_value(item, "category")
 
-        if not isinstance(
-            category,
-            str,
-        ):
-
+        if not isinstance(category, str):
             return
 
-        setattr(
-            item,
-            "category",
-            category.title(),
-        )
+        self.set_value(item, "category", category.title())
+
+
+class QualityCheckPipe(BasePipe):
+    """
+    Bertugas melakukan pengecekan kualitas data (business rule validation).
+    """
+
+    # ------------------------------------------------------------------
+    # Batas nilai yang dianggap valid.
+    # ------------------------------------------------------------------
+    MIN_RATING = 1
+    MAX_RATING = 5
+
+    # ------------------------------------------------------------------
+    # Field yang tidak boleh bernilai negatif.
+    # ------------------------------------------------------------------
+    NON_NEGATIVE_FIELDS = (
+        "price_euro",
+        "excl_tax_euro",
+        "incl_tax_euro",
+        "tax",
+        "stock",
+        "reviews",
+    )
+
+    def process_item(self, item, spider):
+
+        try:
+
+            # ----------------------------------------------------------
+            # Validasi rating.
+            # ----------------------------------------------------------
+            self._check_rating(item)
+
+            # ----------------------------------------------------------
+            # Validasi seluruh field yang tidak boleh bernilai negatif.
+            # ----------------------------------------------------------
+            for field in self.NON_NEGATIVE_FIELDS:
+
+                self._check_non_negative(item, field)
+
+            self.log_success(spider, item)
+
+            return item
+
+        except DropItem as e:
+
+            spider.logger.warning(f"{self.__class__.__name__}: {e}")
+            raise
+
+        except Exception:
+
+            self.log_exception(spider)
+            raise
+
+    # ==============================================================
+    # Helper Methods
+    # ==============================================================
+
+    def _check_rating(self, item):
+        """
+        Memastikan rating berada pada rentang yang valid.
+        """
+
+        rating = self.get_value(item, "rating")
+
+        if rating is None:
+            return
+
+        if not (self.MIN_RATING <= rating <= self.MAX_RATING):
+            raise DropItem(f"Invalid rating.")
+
+    def _check_non_negative(self, item, field):
+        """
+        Memastikan field tidak bernilai negatif.
+        """
+
+        value = self.get_value(item, field)
+
+        if value is None:
+            return
+
+        if value < 0:
+            raise DropItem(f"Negative {field}.")

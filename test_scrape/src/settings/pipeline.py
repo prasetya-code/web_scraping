@@ -5,9 +5,11 @@ ITEM_PIPELINES = {
 
     "src.pipelines.preprocessing.CleaningPipe": 110,
 
-    "src.pipelines.preprocessing.TypePipe": 120,
+    "src.pipelines.preprocessing.DataTypePipe": 120,
 
     "src.pipelines.preprocessing.NormalizationPipe": 130,
+
+    "src.pipelines.preprocessing.QualityCheckPipe": 140,
 
 
     # Detection Process
