@@ -1,15 +1,3 @@
-"""
-Pipeline yang bertugas melakukan preprocessing data hasil scraping
-sebelum diteruskan ke pipeline berikutnya.
-
-Urutan pipeline yang direkomendasikan:
-
-1. CleaningPipeline         : Membersihkan whitespace dan karakter yang tidak diperlukan.
-2. ValidationPipeline       : Memastikan field wajib tersedia dan valid.
-3. TypeConversionPipeline   : Mengubah tipe data (str -> float, int, bool, dsb).
-4. NormalizationPipeline    : Menormalisasi nilai agar memiliki format yang seragam.
-"""
-
 import re
 
 from dataclasses import fields
