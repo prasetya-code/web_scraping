@@ -205,7 +205,7 @@ class ValidationPipe(BasePipe):
 
         for field in self.FLOAT_FIELDS:
 
-            self._validate_float(item field)
+            self._validate_float(item, field)
 
         for field in self.INT_FIELDS:
 

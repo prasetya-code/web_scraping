@@ -16,13 +16,15 @@ pipelines/
 ├── preprocessing.py
 │     ├── ValidationPipeline
 │     ├── CleaningPipeline
-│     └── NormalizationPipeline
+│     ├── DataTypePipeline
+│     ├── NormalizationPipeline
+│     └── QualityCheckPipeline
 │
 ├── detection.py
-│     ├── FingerprintPipeline
 │     ├── DuplicatePipeline
 │     ├── IncrementalPipeline
-│     └── ChangeDetectionPipeline
+│     ├── ChangeDetectionPipeline
+│     └── AnomalyDetectionPipeline
 │
 ├── assets.py
 │     ├── BookImagesPipeline
