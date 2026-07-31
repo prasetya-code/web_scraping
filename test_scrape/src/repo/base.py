@@ -1,12 +1,3 @@
-"""
-Abstract Repository.
-
-Repository bertugas menjadi lapisan abstraksi antara pipeline
-dengan media penyimpanan (JSON, CSV, SQLite, PostgreSQL, dsb).
-
-Seluruh backend repository WAJIB mengimplementasikan class ini.
-"""
-
 from __future__ import annotations
 
 import logging
@@ -24,22 +15,18 @@ from typing import (
 
 logger = logging.getLogger(__name__)
 
-
+"""
+- Bertugas menjadi lapisan abstraksi antara pipeline dengan media penyimpanan (JSON, CSV, SQLite, PostgreSQL, dsb).
+- Seluruh backend repository WAJIB mengimplementasikan class ini.
+"""
 class BaseRepository(ABC):
     """
-    Base class seluruh repository.
-
-    Tujuan:
-    -------
     - Menyamakan interface seluruh backend.
     - Memudahkan pergantian storage tanpa mengubah pipeline.
     - Mengurangi coupling antara pipeline dan storage.
     """
 
-    def __init__(
-        self,
-        location: str,
-    ) -> None:
+    def __init__(self, location: str) -> None:
         """
         Parameters
         ----------
@@ -77,30 +64,21 @@ class BaseRepository(ABC):
         - membaca file
         """
 
-        logger.info(
-            "%s opened.",
-            self.__class__.__name__,
-        )
+        logger.info(f"{self.__class__.__name__} opened.")
 
     def close(self) -> None:
         """
         Menutup resource.
         """
 
-        logger.info(
-            "%s closed.",
-            self.__class__.__name__,
-        )
+        logger.info(f"{self.__class__.__name__} closed.")
 
     # ==========================================================
     # CRUD
     # ==========================================================
 
     @abstractmethod
-    def exists(
-        self,
-        fingerprint: str,
-    ) -> bool:
+    def exists(self, fingerprint: str) -> bool:
         """
         Mengecek apakah fingerprint sudah ada.
         """
@@ -108,10 +86,7 @@ class BaseRepository(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def get(
-        self,
-        fingerprint: str,
-    ) -> dict[str, Any] | None:
+    def get(self, fingerprint: str) -> dict[str, Any] | None:
         """
         Mengambil satu record berdasarkan fingerprint.
         """
@@ -119,10 +94,7 @@ class BaseRepository(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def save(
-        self,
-        item: dict[str, Any],
-    ) -> None:
+    def save(self, item: dict[str, Any]) -> None:
         """
         Menyimpan record baru.
         """
@@ -130,11 +102,7 @@ class BaseRepository(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def update(
-        self,
-        fingerprint: str,
-        item: dict[str, Any],
-    ) -> None:
+    def update(self, fingerprint: str, item: dict[str, Any]) -> None:
         """
         Memperbarui record.
         """
@@ -142,10 +110,7 @@ class BaseRepository(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def delete(
-        self,
-        fingerprint: str,
-    ) -> None:
+    def delete(self, fingerprint: str) -> None:
         """
         Menghapus record.
         """
@@ -157,9 +122,7 @@ class BaseRepository(ABC):
     # ==========================================================
 
     @abstractmethod
-    def all(
-        self,
-    ) -> Iterable[dict[str, Any]]:
+    def all(self) -> Iterable[dict[str, Any]]:
         """
         Mengambil seluruh record.
         """
@@ -167,9 +130,7 @@ class BaseRepository(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def count(
-        self,
-    ) -> int:
+    def count(self) -> int:
         """
         Menghitung jumlah record.
         """
@@ -177,9 +138,7 @@ class BaseRepository(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def clear(
-        self,
-    ) -> None:
+    def clear(self) -> None:
         """
         Menghapus seluruh data.
         """
@@ -190,34 +149,20 @@ class BaseRepository(ABC):
     # Utility
     # ==========================================================
 
-    def __len__(
-        self,
-    ) -> int:
+    def __len__(self) -> int:
 
         return self.count()
 
-    def __contains__(
-        self,
-        fingerprint: str,
-    ) -> bool:
+    def __contains__(self, fingerprint: str) -> bool:
 
-        return self.exists(
-            fingerprint,
-        )
+        return self.exists(fingerprint,)
 
-    def __enter__(
-        self,
-    ) -> "BaseRepository":
+    def __enter__(self) -> "BaseRepository":
 
         self.open()
 
         return self
 
-    def __exit__(
-        self,
-        exc_type,
-        exc,
-        traceback,
-    ) -> None:
+    def __exit__(self, exc_type, exc, traceback) -> None:
 
         self.close()

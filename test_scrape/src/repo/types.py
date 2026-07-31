@@ -1,11 +1,3 @@
-"""
-Repository Types.
-
-Module ini berisi seluruh type alias yang digunakan oleh
-repository agar seluruh backend menggunakan tipe data
-yang konsisten.
-"""
-
 from __future__ import annotations
 
 from pathlib import Path
@@ -17,6 +9,11 @@ from typing import (
     TypeAlias,
 )
 
+
+"""
+Module ini berisi seluruh type alias yang digunakan oleh
+repository agar seluruh backend menggunakan tipe datayang konsisten.
+"""
 
 # ==========================================================
 # Primitive Types

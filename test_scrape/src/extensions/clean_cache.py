@@ -28,7 +28,7 @@ class CacheCleaner:
                 seconds=settings.getint("HTTPCACHE_EXPIRATION_SECS")
             )
 
-            print(f"\n{'=' * 30}")
+            # print(f"\n{'=' * 30}")
             logger.debug(f"Initialized {self.__class__.__name__}.")
             logger.debug(f"Cache directory : {self.cache_dir}")
             logger.debug(f"Cache expiration: {self.max_age}")
@@ -46,6 +46,8 @@ class CacheCleaner:
         deleted = 0
 
         try:
+
+            print(f"\n{'=' * 30}")
             logger.debug("Starting HTTP cache cleanup.")
 
             if not self.cache_dir.exists():
@@ -84,9 +86,10 @@ class CacheCleaner:
             # 
             self._remove_empty_dirs()
 
-            print(f"\n{'=' * 30}")
-            logger.info("HTTP cache cleanup completed. "
-                f"{deleted} expired file(s) removed.")
+            logger.info(
+                "HTTP cache cleanup completed. "
+                f"{deleted} expired file(s) removed."
+                )
             print(f"{'=' * 30}\n")
 
             return deleted

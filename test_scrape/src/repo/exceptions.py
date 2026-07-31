@@ -1,17 +1,7 @@
-"""
-Repository Exceptions.
-
-Seluruh exception yang berhubungan dengan repository
-didefinisikan pada module ini agar mudah dikelola dan
-digunakan oleh seluruh backend.
-"""
-
-
 class RepositoryError(Exception):
     """
-    Base exception seluruh repository.
-
-    Seluruh exception repository sebaiknya mewarisi class ini.
+    - Base exception seluruh repository.
+    - Seluruh exception repository sebaiknya mewarisi class ini.
     """
 
     pass
@@ -21,9 +11,7 @@ class RepositoryError(Exception):
 # Connection
 # ==========================================================
 
-class RepositoryConnectionError(
-    RepositoryError,
-):
+class RepositoryConnectionError(RepositoryError):
     """
     Terjadi ketika gagal membuka koneksi.
 
@@ -37,9 +25,7 @@ class RepositoryConnectionError(
     pass
 
 
-class RepositoryClosedError(
-    RepositoryError,
-):
+class RepositoryClosedError(RepositoryError):
     """
     Repository sudah ditutup tetapi masih digunakan.
     """
@@ -51,40 +37,26 @@ class RepositoryClosedError(
 # Record
 # ==========================================================
 
-class RecordNotFoundError(
-    RepositoryError,
-):
+class RecordNotFoundError(RepositoryError):
     """
     Record dengan fingerprint tertentu tidak ditemukan.
     """
 
-    def __init__(
-        self,
-        fingerprint: str,
-    ):
+    def __init__(self, fingerprint: str):
 
-        super().__init__(
-            f"Record '{fingerprint}' not found."
-        )
+        super().__init__(f"Record '{fingerprint}' not found.")
 
         self.fingerprint = fingerprint
 
 
-class DuplicateRecordError(
-    RepositoryError,
-):
+class DuplicateRecordError(RepositoryError):
     """
     Record dengan fingerprint yang sama sudah ada.
     """
 
-    def __init__(
-        self,
-        fingerprint: str,
-    ):
+    def __init__(self, fingerprint: str):
 
-        super().__init__(
-            f"Record '{fingerprint}' already exists."
-        )
+        super().__init__(f"Record '{fingerprint}' already exists.")
 
         self.fingerprint = fingerprint
 
@@ -93,28 +65,19 @@ class DuplicateRecordError(
 # Validation
 # ==========================================================
 
-class InvalidFingerprintError(
-    RepositoryError,
-):
+class InvalidFingerprintError(RepositoryError):
     """
     Fingerprint tidak valid.
     """
 
-    def __init__(
-        self,
-        fingerprint,
-    ):
+    def __init__(self, fingerprint):
 
-        super().__init__(
-            f"Invalid fingerprint: {fingerprint}"
-        )
+        super().__init__(f"Invalid fingerprint: {fingerprint}")
 
         self.fingerprint = fingerprint
 
 
-class InvalidRecordError(
-    RepositoryError,
-):
+class InvalidRecordError(RepositoryError):
     """
     Record yang diberikan tidak valid.
     """
@@ -126,59 +89,38 @@ class InvalidRecordError(
 # Storage
 # ==========================================================
 
-class StorageNotFoundError(
-    RepositoryError,
-):
+class StorageNotFoundError(RepositoryError):
     """
     File atau database repository tidak ditemukan.
     """
 
-    def __init__(
-        self,
-        location: str,
-    ):
+    def __init__(self, location: str,):
 
-        super().__init__(
-            f"Storage not found: {location}"
-        )
+        super().__init__(f"Storage not found: {location}")
 
         self.location = location
 
 
-class StorageAlreadyExistsError(
-    RepositoryError,
-):
+class StorageAlreadyExistsError(RepositoryError):
     """
     Storage sudah ada.
     """
 
-    def __init__(
-        self,
-        location: str,
-    ):
+    def __init__(self, location: str,):
 
-        super().__init__(
-            f"Storage already exists: {location}"
-        )
+        super().__init__(f"Storage already exists: {location}")
 
         self.location = location
 
 
-class StoragePermissionError(
-    RepositoryError,
-):
+class StoragePermissionError(RepositoryError,):
     """
     Tidak memiliki izin mengakses storage.
     """
 
-    def __init__(
-        self,
-        location: str,
-    ):
+    def __init__(self, location: str):
 
-        super().__init__(
-            f"Permission denied: {location}"
-        )
+        super().__init__(f"Permission denied: {location}")
 
         self.location = location
 
@@ -187,20 +129,13 @@ class StoragePermissionError(
 # Backend
 # ==========================================================
 
-class UnsupportedBackendError(
-    RepositoryError,
-):
+class UnsupportedBackendError(RepositoryError):
     """
     Backend repository tidak didukung.
     """
 
-    def __init__(
-        self,
-        backend: str,
-    ):
+    def __init__(self, backend: str,):
 
-        super().__init__(
-            f"Unsupported backend: {backend}"
-        )
+        super().__init__(f"Unsupported backend: {backend}")
 
         self.backend = backend

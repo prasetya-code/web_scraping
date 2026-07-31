@@ -286,7 +286,7 @@ class BooksSpider(scrapy.Spider):
         )
 
         #
-        self.logger.info(f"{'=' * 30}")
+        self.logger.info(f"\n{'=' * 30}")
         self.logger.info("Spider Finished")
         self.logger.info(f"Crawl ID   : {self.crawl_id}")
         self.logger.info(f"Reason     : {reason}")
@@ -297,20 +297,14 @@ class BooksSpider(scrapy.Spider):
 
         try:
 
-            self.logger.info(
-                "Checking expired HTTP cache..."
-            )
+            print(f"\n{'=' * 30}")
+            self.logger.info(f"Checking expired HTTP cache...")
 
             cleaner = CacheCleaner(
                 settings=self.settings,
             )
 
             deleted = cleaner.clean()
-
-            self.logger.info(
-                "HTTP cache cleanup finished. "
-                f"Deleted {deleted} expired file(s)."
-            )
 
             #
             stats.set_value(

@@ -1,13 +1,3 @@
-"""
-Repository Manager.
-
-Manager bertugas mengelola lifecycle repository.
-
-Pipeline cukup menggunakan RepositoryManager sehingga
-tidak perlu lagi memanggil RepositoryFactory maupun
-open()/close() secara langsung.
-"""
-
 from __future__ import annotations
 
 import logging
@@ -20,7 +10,11 @@ from src.repo.factory import RepositoryFactory
 
 logger = logging.getLogger(__name__)
 
-
+"""
+- Manager bertugas mengelola lifecycle repository.
+- Pipeline cukup menggunakan RepositoryManager sehingga
+tidak perlu lagi memanggil RepositoryFactory maupunopen()/close() secara langsung.
+"""
 class RepositoryManager:
     """
     Singleton Repository Manager.
@@ -29,34 +23,24 @@ class RepositoryManager:
     _repository: BaseRepository | None = None
 
     @classmethod
-    def get_repository(
-        cls,
-        settings: Settings,
-    ) -> BaseRepository:
+    def get_repository(cls, settings: Settings) -> BaseRepository:
         """
-        Mengembalikan repository aktif.
-
-        Repository hanya dibuat satu kali.
+        - Mengembalikan repository aktif.
+        - Repository hanya dibuat satu kali.
         """
 
         if cls._repository is None:
 
-            cls._repository = RepositoryFactory.create(
-                settings,
-            )
+            cls._repository = RepositoryFactory.create(settings)
 
             cls._repository.open()
 
-            logger.info(
-                "Repository initialized."
-            )
+            logger.info("Repository initialized.")
 
         return cls._repository
 
     @classmethod
-    def close(
-        cls,
-    ) -> None:
+    def close(cls) -> None:
         """
         Menutup repository.
         """
@@ -67,8 +51,6 @@ class RepositoryManager:
 
         cls._repository.close()
 
-        logger.info(
-            "Repository closed."
-        )
+        logger.info("Repository closed.")
 
         cls._repository = None
