@@ -9,7 +9,21 @@
 
 
 # Notes
-1. pipeline tree
+1. Repo tree
+```bash
+repo/
+├── __init__.py
+├── base.py
+├── factory.py
+├── csv_repo.py
+├── json_repo.py
+├── sqlite_repo.py
+└── postgres_repo.py
+```
+
+
+
+2. pipeline tree
 ```bash
 pipelines/
 │
@@ -57,7 +71,7 @@ pipelines/
 | 16    | Distributed Crawling (`scrapy-redis`)  | ⭐⭐☆☆☆        |
 
 
-2. Selector versioning
+3. Selector versioning
 ```bash
 Halaman List
       │
@@ -88,7 +102,7 @@ extract_detail()
 
 Keuntungannya adalah setiap Response selalu dideteksi berdasarkan HTML yang diterima. Jika suatu saat hanya halaman katalog yang berubah ke V2 sementara halaman detail masih menggunakan struktur V1 (atau sebaliknya), spider tetap akan memilih selector yang tepat tanpa perlu logika tambahan atau meneruskan objek selector antar callback. Ini membuat arsitektur versioning lebih fleksibel dan tahan terhadap perubahan parsial pada website.
 
-3. Metadata
+4. Metadata
       - Crawl Metadata: menggunakan `stats collector` 
       - Request Metadata: menggunakan `items` -> disatukan dengan items data utama namun beda class
       - Spider Metadata: menggunakan `items` -> disatukan dengan items data utama namun beda class
