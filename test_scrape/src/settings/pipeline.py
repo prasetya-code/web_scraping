@@ -18,8 +18,7 @@ ITEM_PIPELINES = {
 
 
     # Asset Process
-
-    # "src.pipelines.assets.BookImagesPipeline":500,
+    "src.pipelines.assets.BookImagesPipe":300,
 
 
     # ETL Process
