@@ -12,7 +12,7 @@ ITEM_PIPELINES = {
 
     # Detection Process
 
-    # "src.pipelines.duplicate.DuplicatePipeline":400,
+    # "src.pipelines.duplicate.DuplicatePipeline":200,
 
 
     # Asset Process
@@ -23,6 +23,9 @@ ITEM_PIPELINES = {
     # ETL Process
 
     # "src.pipelines.transform.TransformationPipeline":600,
+
+
+    # Database Process
 }
 
 # IMAGES_THUMBS = {

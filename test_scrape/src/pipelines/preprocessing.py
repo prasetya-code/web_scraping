@@ -183,6 +183,7 @@ class ValidationPipe(BasePipe):
             raise DropItem("price_euro is required.")
 
         if isinstance(price_euro, str):
+            # Membersihkan semua karakter selain angka (0-9) dan titik (cocok jika tidak ada spasi)
             cleaned_price_euro = re.sub(
                 r"[^\d.]",
                 "",
@@ -205,6 +206,7 @@ class ValidationPipe(BasePipe):
             raise DropItem("excl_tax_euro is required.")
 
         if isinstance(excl_tax_euro, str):
+            # Membersihkan semua karakter selain angka (0-9) dan titik (cocok jika tidak ada spasi)
             cleaned_excl_tax_euro = re.sub(
                 r"[^\d.]",
                 "",
@@ -227,6 +229,7 @@ class ValidationPipe(BasePipe):
             raise DropItem("incl_tax_euro is required.")
 
         if isinstance(incl_tax_euro, str):
+            # Membersihkan semua karakter selain angka (0-9) dan titik (cocok jika tidak ada spasi)
             cleaned_incl_tax_euro = re.sub(
                 r"[^\d.]",
                 "",
@@ -249,6 +252,7 @@ class ValidationPipe(BasePipe):
             raise DropItem("tax is required.")
 
         if isinstance(tax, str):
+            # Membersihkan semua karakter selain angka (0-9) dan titik (cocok jika tidak ada spasi)
             cleaned_tax = re.sub(
                 r"[^\d.]",
                 "",
@@ -268,17 +272,31 @@ class ValidationPipe(BasePipe):
         )
 
         if stock is None:
-            raise DropItem("stock is required.")
+            raise DropItem(
+                "stock is required."
+            )
 
         if isinstance(stock, str):
-            cleaned_stock = re.sub(
-                r"[^\d.]",
-                "",
+            # Mengambil satu atau lebih angka dari string yang ada
+            match = re.search(
+                r"\d+",
                 stock,
             )
 
-            if not cleaned_stock:
-                raise DropItem("stock contains no numeric value.")
+            if not match:
+                raise DropItem(
+                    "stock contains no numeric value."
+                )
+
+            stock = int(
+                match.group()
+            )
+
+            setattr(
+                item,
+                "stock",
+                stock,
+            )
 
 
         # reviews param
@@ -293,6 +311,7 @@ class ValidationPipe(BasePipe):
             raise DropItem("reviews is required.")
 
         if isinstance(reviews, str):
+            # Membersihkan semua karakter selain angka (0-9) dan titik (cocok jika tidak ada spasi)
             cleaned_reviews = re.sub(
                 r"[^\d.]",
                 "",
