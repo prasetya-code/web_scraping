@@ -38,8 +38,6 @@ class ExporterFactory:
         except KeyError:
 
             # Apabila format tidak ditemukan di dictionary, berarti exporter tersebut belum tersedia.
-            raise ValueError(
-                f"Format export '{export_format}' belum didukung."
-            )
+            raise ValueError(f"Format export '{export_format}' belum didukung.")
 
         return exporter(export_dir)
