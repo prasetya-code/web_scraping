@@ -3,29 +3,33 @@ DETECTION = {
     # Export yang digunakan
     "backend": "sqlite",
 
-    # File
+    # =========================================
+    # File Section
+    # =========================================
     "csv": {
-        "path": "storage/books.csv",
-        "delimiter": ",",
+        "path": "storage/data/books.csv",
+        "delimiter": ";",
         "encoding": "utf-8",
     },
 
     "json": {
-        "path": "storage/books.json",
+        "path": "storage/data/books.json",
         "encoding": "utf-8",
         "indent": 4,
     },
 
     "xml": {
-        "path": "storage/books.xml",
+        "path": "storage/data/books.xml",
         "encoding": "utf-8",
         "root": "books",
         "item": "book",
     },
 
+    # =========================================
     # Database
+    # =========================================
     "sqlite": {
-        "database": "storage/books.db",
+        "database": "storage/data/books.db",
         "table": "books",
     },
 
@@ -51,22 +55,5 @@ DETECTION = {
         "uri": "mongodb://localhost:27017",
         "database": "books",
         "collection": "books",
-    },
-
-    # Detector
-    "duplicate": {
-        "enabled": True,
-    },
-
-    "incremental": {
-        "enabled": True,
-    },
-
-    "change_detection": {
-        "enabled": True,
-    },
-
-    "anomaly": {
-        "enabled": False,
-    },
+    }
 }

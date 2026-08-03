@@ -32,6 +32,10 @@ class BooksSpider(scrapy.Spider):
 
         # HTTP Cache
         "HTTPCACHE_DIR": str(BASE_DIR / "storage" / "httpcache" / "books"),
+
+        # Export Data Path & Format
+        "EXPORT_DIR": str(BASE_DIR / "storage" / "data"),
+        "EXPORT_FORMAT": "json",
     }
 
     # Manager akan menentukan selector yang sesuai berdasarkan struktur halaman.

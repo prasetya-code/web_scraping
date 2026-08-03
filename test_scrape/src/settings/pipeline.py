@@ -26,7 +26,8 @@ ITEM_PIPELINES = {
     # "src.pipelines.transform.TransformationPipeline":600,
 
 
-    # Database Process
+    # Export Process
+    "src.pipelines.export.ExportPipe": 800,
 }
 
 # IMAGES_THUMBS = {
