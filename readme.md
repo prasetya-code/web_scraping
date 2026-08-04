@@ -9,16 +9,16 @@
 
 
 # Notes
-1. Repo tree
+1. Spider hanya bertugas:
 ```bash
-repo/
-├── __init__.py
-├── base.py
-├── factory.py
-├── csv_repo.py
-├── json_repo.py
-├── sqlite_repo.py
-└── postgres_repo.py
+Request
+↓
+
+Response
+
+↓
+
+Item
 ```
 
 

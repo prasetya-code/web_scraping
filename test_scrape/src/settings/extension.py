@@ -7,6 +7,10 @@ EXTENSIONS = {
     # Disable Telnet Console
     "scrapy.extensions.telnet.TelnetConsole": None,
 
-    # Cleaning Jobdir
-    "src.extensions.clean_jobdir.JobdirCleaner": 500,
+    # Jobdir
+    "src.extensions.jobdir.JobdirState": 110,
+    "src.extensions.jobdir.JobdirCleaner": 120,
+
+    # Cache
+    "src.extensions.cache.CacheCleaner":300,
 }
