@@ -3,9 +3,9 @@ import logging
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
+from collections.abc import Iterator
 
 from scrapy.settings import Settings
-from collections.abc import Iterator
 
 
 logger = logging.getLogger(__name__)
@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 @dataclass(frozen=True, slots=True)
 class CacheEntry:
     """
-    Class ini hanya menyimpan informasi mengenai file cache.
+    Class ini hanya menyimpan informasi mengenai satu file cache.
     """
 
     path: Path
@@ -27,9 +27,13 @@ class CacheEntry:
             return self.path.exists()
 
         except Exception:
-            logger.exception("Gagal memeriksa keberadaan file cache: %s", self.path)
+            logger.exception(
+                "Gagal memeriksa keberadaan file cache: %s",
+                self.path,
+            )
             raise
 
+    @property
     def modified_time(self) -> datetime:
         """
         Mengambil waktu terakhir file dimodifikasi.
@@ -43,9 +47,13 @@ class CacheEntry:
             )
 
         except Exception:
-            logger.exception("Gagal mengambil waktu modifikasi file cache: %s", self.path)
+            logger.exception(
+                "Gagal mengambil waktu modifikasi file cache: %s",
+                self.path,
+            )
             raise
 
+    @property
     def age(self) -> timedelta:
         """
         Menghitung umur file cache.
@@ -53,24 +61,35 @@ class CacheEntry:
         try:
             return (
                 datetime.now(timezone.utc)
-                - self.modified_time()
+                - self.modified_time
             )
 
         except Exception:
-            logger.exception("Gagal menghitung umur file cache: %s", self.path)
+            logger.exception(
+                "Gagal menghitung umur file cache: %s",
+                self.path,
+            )
             raise
 
-    def is_expired(self, max_age: timedelta) -> bool:
+    def is_expired(
+        self,
+        max_age: timedelta,
+    ) -> bool:
         """
-        Memeriksa apakah file cache telah melewati batas umur yang ditentukan.
+        Memeriksa apakah file cache telah melewati
+        batas umur yang ditentukan.
         """
         try:
-            return self.age() > max_age
+            return self.age > max_age
 
         except Exception:
-            logger.exception("Gagal memeriksa status kedaluwarsa cache: %s", self.path)
+            logger.exception(
+                "Gagal memeriksa status kedaluwarsa cache: %s",
+                self.path,
+            )
             raise
 
+    @property
     def size(self) -> int:
         """
         Mengambil ukuran file cache dalam satuan byte.
@@ -79,22 +98,29 @@ class CacheEntry:
             return self.path.stat().st_size
 
         except Exception:
-            logger.exception("Gagal mengambil ukuran file cache: %s", self.path)
+            logger.exception(
+                "Gagal mengambil ukuran file cache: %s",
+                self.path,
+            )
             raise
 
 
-class BaseCache:
+class CacheManager:
     """
     Class ini bertanggung jawab terhadap:
+
     - Membaca konfigurasi cache dari Scrapy.
     - Mengelola direktori cache.
     - Menyediakan iterator file cache.
     - Menyediakan operasi dasar filesystem.
     """
 
-    def __init__(self, settings: Settings) -> None:
+    def __init__(
+        self,
+        settings: Settings,
+    ) -> None:
         """
-        Inisialisasi object BaseCache.
+        Inisialisasi object CacheManager.
         """
         try:
             self.settings = settings
@@ -104,27 +130,59 @@ class BaseCache:
             )
 
             if not cache_dir:
+
                 raise ValueError(
                     "HTTPCACHE_DIR belum dikonfigurasi."
                 )
 
-            self.cache_dir = Path(cache_dir)
+            self._cache_dir = Path(
+                cache_dir
+            )
 
-            self.max_age = timedelta(
+            self._max_age = timedelta(
                 seconds=settings.getint(
                     "HTTPCACHE_EXPIRATION_SECS"
                 )
             )
 
             print(f"\n{'=' * 45}")
-            logger.debug(f"Initialized {self.__class__.__name__}")
-            logger.debug(f"Cache directory : {self.cache_dir}")
-            logger.debug(f"Cache expiration : {self.max_age}")
+
+            logger.debug(
+                "Initialized %s",
+                self.__class__.__name__,
+            )
+
+            logger.debug(
+                "Cache directory : %s",
+                self.cache_dir,
+            )
+
+            logger.debug(
+                "Cache expiration : %s",
+                self.max_age,
+            )
+
             print(f"{'=' * 45}\n")
 
         except Exception:
-            logger.exception("Gagal menginisialisasi BaseCache.")
+            logger.exception(
+                "Gagal menginisialisasi CacheManager."
+            )
             raise
+
+    @property
+    def cache_dir(self) -> Path:
+        """
+        Mengambil lokasi direktori HTTP Cache.
+        """
+        return self._cache_dir
+
+    @property
+    def max_age(self) -> timedelta:
+        """
+        Mengambil batas umur file cache.
+        """
+        return self._max_age
 
     def exists(self) -> bool:
         """
@@ -134,7 +192,9 @@ class BaseCache:
             return self.cache_dir.exists()
 
         except Exception:
-            logger.exception("Gagal memeriksa direktori cache.")
+            logger.exception(
+                "Gagal memeriksa direktori cache."
+            )
             raise
 
     def is_empty(self) -> bool:
@@ -150,7 +210,9 @@ class BaseCache:
             )
 
         except Exception:
-            logger.exception("Gagal memeriksa isi direktori cache.")
+            logger.exception(
+                "Gagal memeriksa isi direktori cache."
+            )
             raise
 
     def file_count(self) -> int:
@@ -165,10 +227,12 @@ class BaseCache:
             )
 
         except Exception:
-            logger.exception("Gagal menghitung jumlah file cache.")
+            logger.exception(
+                "Gagal menghitung jumlah file cache."
+            )
             raise
 
-    def iter_files(self):
+    def iter_files(self) -> Iterator[CacheEntry]:
         """
         Melakukan iterasi seluruh file cache.
 
@@ -186,10 +250,12 @@ class BaseCache:
                 yield CacheEntry(path)
 
         except Exception:
-            logger.exception("Gagal melakukan iterasi file cache.")
+            logger.exception(
+                "Gagal melakukan iterasi file cache."
+            )
             raise
 
-    def iter_directories(self):
+    def iter_directories(self) -> Iterator[Path]:
         """
         Melakukan iterasi seluruh direktori cache.
         """
@@ -210,43 +276,63 @@ class BaseCache:
             yield from directories
 
         except Exception:
-            logger.exception("Gagal melakukan iterasi direktori cache.")
+            logger.exception(
+                "Gagal melakukan iterasi direktori cache."
+            )
             raise
 
     def expired_files(self) -> Iterator[CacheEntry]:
         """
-        Melakukan iterasi seluruh file cache yang telah melewati batas umur penyimpanan.
+        Melakukan iterasi seluruh file cache
+        yang telah melewati batas umur penyimpanan.
         """
         try:
             for entry in self.iter_files():
 
-                if entry.is_expired(self.max_age):
+                if entry.is_expired(
+                    self.max_age,
+                ):
 
                     yield entry
 
         except Exception:
-            logger.exception("Gagal mendapatkan daftar cache yang kedaluwarsa.")
+            logger.exception(
+                "Gagal mendapatkan daftar cache yang kedaluwarsa."
+            )
             raise
 
-    def remove_file(self, entry: CacheEntry) -> bool:
+    def remove_file(
+        self,
+        entry: CacheEntry,
+    ) -> bool:
         """
         Menghapus satu file cache.
         """
         try:
             if not entry.exists():
 
-                logger.debug(f"File cache tidak ditemukan: {entry.path}")
+                logger.debug(
+                    "File cache tidak ditemukan: %s",
+                    entry.path,
+                )
 
                 return False
 
             entry.path.unlink()
 
-            logger.debug(f"File cache berhasil dihapus: {entry.path}")
+            logger.debug(
+                "File cache berhasil dihapus: %s",
+                entry.path,
+            )
 
             return True
 
         except Exception:
-            logger.exception("Gagal menghapus file cache: %s", entry.path)
+            logger.exception(
+                "Gagal menghapus file cache: %s",
+                entry.path,
+            )
+
             return False
 
     def remove_empty_directories(self) -> int:
@@ -263,7 +349,10 @@ class BaseCache:
 
                     removed += 1
 
-                    logger.debug(f"Direktori kosong berhasil dihapus: {directory}")
+                    logger.debug(
+                        "Direktori kosong berhasil dihapus: %s",
+                        directory,
+                    )
 
                 except OSError:
                     #
@@ -272,12 +361,17 @@ class BaseCache:
                     continue
 
                 except Exception:
-                    logger.exception("Gagal menghapus direktori: %s", directory)
+                    logger.exception(
+                        "Gagal menghapus direktori: %s",
+                        directory,
+                    )
 
             return removed
 
         except Exception:
-            logger.exception("Gagal membersihkan direktori cache.")
+            logger.exception(
+                "Gagal membersihkan direktori cache."
+            )
             raise
 
     def clear(self) -> int:
@@ -294,13 +388,24 @@ class BaseCache:
 
                     deleted += 1
 
-            self.remove_empty_directories()
+            removed = self.remove_empty_directories()
 
             print(f"\n{'=' * 45}")
+
             logger.info(
-                f"Seluruh cache berhasil dibersihkan. "
-                f"{deleted} file dihapus."
+                "Seluruh cache berhasil dibersihkan."
             )
+
+            logger.info(
+                "File cache dihapus      : %s",
+                deleted,
+            )
+
+            logger.info(
+                "Direktori kosong dihapus: %s",
+                removed,
+            )
+
             print(f"{'=' * 45}\n")
 
             return deleted
@@ -311,10 +416,13 @@ class BaseCache:
             )
             raise
 
-class CacheCleaner(BaseCache):
+
+class CacheCleaner(CacheManager):
     """
-    Membersihkan file HTTP Cache yang telah melewati
-    batas waktu penyimpanan.
+    Class ini bertanggung jawab terhadap:
+
+    - Membersihkan file HTTP Cache yang telah melewati
+      batas waktu penyimpanan.
     """
 
     def clean(self) -> int:
@@ -325,7 +433,11 @@ class CacheCleaner(BaseCache):
 
         try:
             print(f"\n{'=' * 45}")
-            logger.info("Memulai pembersihan HTTP Cache.")
+
+            logger.info(
+                "Memulai pembersihan HTTP Cache."
+            )
+
             print(f"{'=' * 45}\n")
 
             #
@@ -333,7 +445,10 @@ class CacheCleaner(BaseCache):
             #
             if not self.exists():
 
-                logger.warning("Direktori HTTP Cache tidak ditemukan: %s", self.cache_dir)
+                logger.warning(
+                    "Direktori HTTP Cache tidak ditemukan: %s",
+                    self.cache_dir,
+                )
 
                 return deleted
 
@@ -343,10 +458,24 @@ class CacheCleaner(BaseCache):
             if self.is_empty():
 
                 print(f"\n{'=' * 45}")
-                logger.info("Direktori HTTP Cache kosong.")
+
+                logger.info(
+                    "Direktori HTTP Cache kosong."
+                )
+
                 print(f"{'=' * 45}\n")
 
                 return deleted
+
+            #
+            # Menghitung jumlah file sebelum pembersihan.
+            #
+            total_files = self.file_count()
+
+            logger.info(
+                "Jumlah file cache : %s",
+                total_files,
+            )
 
             #
             # Menghapus seluruh cache yang telah kedaluwarsa.
@@ -362,14 +491,166 @@ class CacheCleaner(BaseCache):
             #
             removed = self.remove_empty_directories()
 
+            #
+            # Menghitung jumlah file yang masih tersisa.
+            #
+            remaining = self.file_count()
+
             print(f"\n{'=' * 45}")
-            logger.info("Pembersihan HTTP Cache selesai.")
-            logger.info(f"File cache dihapus      : {deleted}")
-            logger.info(f"Direktori kosong dihapus: {removed}")
+
+            logger.info(
+                "Pembersihan HTTP Cache selesai."
+            )
+
+            logger.info(
+                "File cache sebelum dibersihkan : %s",
+                total_files,
+            )
+
+            logger.info(
+                "File cache dihapus             : %s",
+                deleted,
+            )
+
+            logger.info(
+                "File cache tersisa             : %s",
+                remaining,
+            )
+
+            logger.info(
+                "Direktori kosong dihapus       : %s",
+                removed,
+            )
+
             print(f"{'=' * 45}\n")
 
             return deleted
 
         except Exception:
-            logger.exception("Terjadi kesalahan saat membersihkan HTTP Cache.")
+
+            logger.exception(
+                "Terjadi kesalahan saat membersihkan HTTP Cache."
+            )
+
+            raise
+
+
+from scrapy import signals
+from scrapy.crawler import Crawler
+
+
+class CacheExtension:
+    """
+    Class ini bertanggung jawab terhadap:
+
+    - Menghubungkan CacheCleaner dengan lifecycle Scrapy.
+    - Menjalankan pembersihan HTTP Cache setelah spider selesai.
+    - Menyimpan statistik pembersihan cache.
+    """
+
+    @classmethod
+    def from_crawler(
+        cls,
+        crawler: Crawler,
+    ) -> "CacheExtension":
+        """
+        Factory method yang dipanggil otomatis oleh Scrapy
+        ketika Extension diinisialisasi.
+        """
+        try:
+            extension = cls(crawler)
+
+            #
+            # Dipanggil ketika seluruh engine Scrapy benar-benar
+            # telah berhenti.
+            #
+            crawler.signals.connect(
+                extension.engine_stopped,
+                signal=signals.engine_stopped,
+            )
+
+            return extension
+
+        except Exception:
+            logger.exception(
+                "Gagal menginisialisasi CacheExtension."
+            )
+            raise
+
+    def __init__(
+        self,
+        crawler: Crawler,
+    ) -> None:
+        """
+        Inisialisasi object CacheExtension.
+        """
+        try:
+            self.crawler = crawler
+
+            self.settings = crawler.settings
+
+            self.stats = crawler.stats
+
+            logger.debug(
+                "Initialized %s.",
+                self.__class__.__name__,
+            )
+
+        except Exception:
+            logger.exception(
+                "Gagal menginisialisasi CacheExtension."
+            )
+            raise
+
+    @property
+    def cleaner(self) -> CacheCleaner:
+        """
+        Membuat object CacheCleaner berdasarkan
+        konfigurasi Scrapy saat ini.
+        """
+        try:
+            return CacheCleaner(
+                settings=self.settings,
+            )
+
+        except Exception:
+            logger.exception(
+                "Gagal membuat CacheCleaner."
+            )
+            raise
+
+    def engine_stopped(self) -> None:
+        """
+        Dipanggil setelah seluruh engine Scrapy berhenti.
+
+        Pada tahap ini seluruh proses crawling telah selesai,
+        sehingga aman untuk melakukan pembersihan HTTP Cache.
+        """
+        try:
+            print(f"\n{'=' * 45}")
+
+            logger.info(
+                "Checking expired HTTP Cache..."
+            )
+
+            print(f"{'=' * 45}\n")
+
+            deleted = self.cleaner.clean()
+
+            #
+            # Menyimpan statistik pembersihan cache.
+            #
+            self.stats.set_value(
+                "cache/deleted",
+                deleted,
+            )
+
+            logger.info(
+                "HTTP Cache cleanup completed."
+            )
+
+        except Exception:
+            logger.exception(
+                "Terjadi kesalahan saat menjalankan CacheExtension."
+            )
             raise

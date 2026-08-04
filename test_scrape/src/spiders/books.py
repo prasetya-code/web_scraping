@@ -67,7 +67,7 @@ class BooksSpider(scrapy.Spider):
         # ==================================================
 
         "EXPORT_DIR": str(BASE_DIR / "storage" / "data"),
-        "EXPORT_FORMAT": "json",
+        "EXPORT_FORMAT": "csv",
     }
 
     # Manager akan menentukan selector yang digunakan berdasarkan struktur halaman.

@@ -6,7 +6,7 @@ from ..base import BaseExporter
 
 logger = logging.getLogger(__name__)
 
-
+# ERRORS
 class JsonExporter(BaseExporter):
     """
     Exporter untuk menyimpan hasil scraping ke dalam format JSON.

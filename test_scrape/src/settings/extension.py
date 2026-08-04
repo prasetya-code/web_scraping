@@ -12,5 +12,5 @@ EXTENSIONS = {
     "src.extensions.jobdir.JobdirCleaner": 120,
 
     # Cache
-    "src.extensions.cache.CacheCleaner":300,
+    "src.extensions.cache.CacheExtension":300,
 }

@@ -8,6 +8,8 @@
 | Server milik sendiri |                           8–16 |            4.0–8.0 |
 
 
+# Format JSON exporters masih bermasalah
+
 # Notes
 1. Spider hanya bertugas:
 ```bash
