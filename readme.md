@@ -11,17 +11,9 @@
 # Format JSON exporters masih bermasalah
 
 # Notes
-1. Spider hanya bertugas:
-```bash
-Request
-↓
+1. feeder
+- csv bisa menggunakan metode bacthing (baik id maupun timestamp) pada saat process feed
 
-Response
-
-↓
-
-Item
-```
 
 
 

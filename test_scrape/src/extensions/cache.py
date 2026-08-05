@@ -10,7 +10,7 @@ from scrapy.settings import Settings
 
 logger = logging.getLogger(__name__)
 
-
+# must set in settings/extension.py
 @dataclass(frozen=True, slots=True)
 class CacheEntry:
     """

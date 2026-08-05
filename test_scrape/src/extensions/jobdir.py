@@ -9,7 +9,7 @@ from scrapy import signals
 
 logger = logging.getLogger(__name__)
 
-
+# must set in settings/extension.py
 class BaseJobdirExtension:
     """
     Class ini menyediakan operasi umum seperti membaca konfigurasi,

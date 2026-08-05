@@ -1,6 +1,7 @@
 ITEM_PIPELINES = {
 
     # Preparation Process
+    # =========================
     "src.pipelines.preprocessing.ValidationPipe": 100,
 
     "src.pipelines.preprocessing.CleaningPipe": 110,
@@ -13,21 +14,19 @@ ITEM_PIPELINES = {
 
 
     # Detection Process
-
+    # =========================
     # "src.pipelines.duplicate.DuplicatePipeline":200,
 
 
     # Asset Process
+    # =========================
+
     "src.pipelines.assets.BookImagesPipe":300,
 
 
     # ETL Process
-
+    # =========================
     # "src.pipelines.transform.TransformationPipeline":600,
-
-
-    # Export Process
-    "src.pipelines.export.ExportPipe": 800,
 }
 
 # IMAGES_THUMBS = {

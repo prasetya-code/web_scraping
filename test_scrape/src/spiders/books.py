@@ -8,6 +8,7 @@ from pathlib import Path
 import scrapy
 
 from src.selectors.manager import SelectorManager
+from src.utils.feeder import build_feed
 
 
 # ==========================================================
@@ -63,12 +64,22 @@ class BooksSpider(scrapy.Spider):
         "HTTPCACHE_DIR": str(BASE_DIR / "storage" / "httpcache" / "books"),
 
         # ==================================================
-        # Export
+        # Export Param
         # ==================================================
 
         "EXPORT_DIR": str(BASE_DIR / "storage" / "data"),
         "EXPORT_FORMAT": "csv",
+        "EXPORT_BATCH_SIZE": 500,
+        "EXPORT_DELIMITER": ";",
     }
+
+    # Custom Feed
+    custom_settings["FEEDS"] = build_feed(
+        export_dir=custom_settings["EXPORT_DIR"],
+        spider_name=name,
+        export_format=custom_settings["EXPORT_FORMAT"],
+        batch_size=custom_settings["EXPORT_BATCH_SIZE"],
+    )
 
     # Manager akan menentukan selector yang digunakan berdasarkan struktur halaman.
     selector_manager = SelectorManager()
