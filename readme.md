@@ -10,6 +10,8 @@
 
 # Format JSON exporters masih bermasalah
 
+Perhatikan CAPTCHA atau MFA
+
 # Notes
 0. Jika memiliki banyaj spider maka sebaiknya items_pipelien diterapkan di custom_settings, sedangkan untuk Downloader Middleware → Sebaiknya tetap global
 
