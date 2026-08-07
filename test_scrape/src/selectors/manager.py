@@ -9,10 +9,6 @@ logger = logging.getLogger(__name__)
 
 
 class SelectorManager:
-    """
-    Bertugas memilih selector yang sesuai dengan struktur halaman.
-    """
-
     """ 
     - Daftar seluruh selector yang tersedia disimpan sebagai class, bukan object.
     - Daftar ini akan diurutkan berdasarkan VERSION (terbaru -> terlama), hanya satu kali saat modul pertama kali di-load.

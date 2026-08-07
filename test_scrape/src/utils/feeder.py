@@ -5,7 +5,7 @@ def build_feed(
     spider_name,
     export_format,
     batch_size,
-    delimiter       # for csv
+    delimiter=";"       # for csv
 ):
     feed = {
         str(Path(export_dir) / f"{spider_name}_%(batch_id)03d.{export_format}"): {

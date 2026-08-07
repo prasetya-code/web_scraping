@@ -11,10 +11,7 @@
 # Format JSON exporters masih bermasalah
 
 # Notes
-1. feeder
-- csv bisa menggunakan metode bacthing (baik id maupun timestamp) pada saat process feed
-
-
+1. proxy rotation -> [link](https://dataimpulse.com/id/blog/scrapy-rotating-proxies/)
 
 
 2. pipeline tree

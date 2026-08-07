@@ -70,7 +70,6 @@ class BooksSpider(scrapy.Spider):
         "EXPORT_DIR": str(BASE_DIR / "storage" / "data"),
         "EXPORT_FORMAT": "csv",
         "EXPORT_BATCH_SIZE": 500,
-        "EXPORT_DELIMITER": ";",
     }
 
     # Custom Feed
