@@ -11,6 +11,30 @@
 # Format JSON exporters masih bermasalah
 
 # Notes
+0. Jika memiliki banyaj spider maka sebaiknya items_pipelien diterapkan di custom_settings, sedangkan untuk Downloader Middleware → Sebaiknya tetap global
+
+Downloader middleware bekerja pada request dan response, bukan pada item.
+
+Contohnya:
+
+- RetryMiddleware
+- RotateUserAgentMiddleware
+- ProxyMiddleware
+- RandomDelayMiddleware
+- HttpCacheMiddleware
+
+```bash
+Request
+    ↓
+Downloader Middleware
+    ↓
+Downloader
+    ↓
+Response
+    ↓
+Spider
+```
+
 1. proxy rotation -> [link](https://dataimpulse.com/id/blog/scrapy-rotating-proxies/)
 
 

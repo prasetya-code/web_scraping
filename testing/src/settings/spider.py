@@ -59,3 +59,21 @@ AUTOTHROTTLE_TARGET_CONCURRENCY = 1.0
 
 # Menampilkan log penyesuaian delay AutoThrottle.
 AUTOTHROTTLE_DEBUG = False
+
+
+
+
+
+DEPTH_LIMIT = 0
+
+DEPTH_PRIORITY = 0
+
+DEPTH_STATS_VERBOSE = False
+
+REFERRER_POLICY = (
+    "scrapy.spidermiddlewares.referer.DefaultReferrerPolicy"
+)
+
+HTTPERROR_ALLOW_ALL = False
+
+HTTPERROR_ALLOWED_CODES = []
